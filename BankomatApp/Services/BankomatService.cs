@@ -1,6 +1,6 @@
 ﻿namespace BankomatApp.Services;
 
-public class BankomatService
+public class BankomatService : IBankomatService
 {
     private string password = "5555";
     private decimal balance = 500;
@@ -9,43 +9,48 @@ public class BankomatService
 
     public string GetPhoneNumber()
     {
-        return phoneNumber;
+        return this.phoneNumber;
     }
-    public bool ConnectPhoneNumber(string _phoneNumber)
+    public bool ConnectPhoneNumber(string phoneNumber)
     {
-        if(string.IsNullOrEmpty(_phoneNumber)) return false;
-        if(!(_phoneNumber.StartsWith("+998") && _phoneNumber.Length == 13)) return false;
-        phoneNumber = _phoneNumber;
+        if (string.IsNullOrEmpty(phoneNumber)) return false;
+        if (!(phoneNumber.StartsWith("+998") && phoneNumber.Length == 13)) return false;
+        this.phoneNumber = phoneNumber;
         return true;
     }
-    public bool ChangePaswword(string _newPassword, string _confirmationPassword)
+    public bool ChangePaswword(string newPassword, string confirmationPassword)
     {
-        if (_newPassword != _confirmationPassword) return false;
-        password = _newPassword;
+        if (newPassword != confirmationPassword) return false;
+        this.password = newPassword;
         return true;
     }
 
-    public bool CheckPassword(string _password)
+    public bool CheckPassword(string password)
     {
-        return _password == password;
+        return password == this.password;
     }
 
     public bool GetCash(decimal amountCash)
     {
-        if (amountCash <= 0 || amountCash > balance) return false;
-        balance -= amountCash;
+        if (amountCash <= 0 || amountCash > this.balance) return false;
+        this.balance -= amountCash;
         return true;
     }
 
     public decimal CheckBalance()
     {
-        return balance;
+        return this.balance;
     }
 
-    public bool AddBalance(decimal _balance)
+    public bool AddBalance(decimal balance)
     {
-        if (_balance <= 0) return false;
-        balance += _balance;
+        if (balance <= 0) return false;
+        this.balance += balance;
         return true;
+    }
+
+    public string GetPassword()
+    {
+        return this.password;
     }
 }

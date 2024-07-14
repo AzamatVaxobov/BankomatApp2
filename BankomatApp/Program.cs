@@ -1,119 +1,121 @@
 ﻿using BankomatApp.Services;
-using Serilog;
 
-namespace BankomatApp
+namespace BankomatApp;
+
+internal class Program
 {
-    internal class Program
+    static void Main(string[] args)
     {
-        static void Main(string[] args)
+
+        IBankomatService atmService = new BankomatService();
+        ILoggingService logService = new LoggingService();
+
+        var password = string.Empty;
+
+        var isPasswordReal = false;
+
+        for (var i = 0; i < 3; i++)
         {
-
-            Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Debug()
-            .WriteTo.Console()
-            .CreateLogger();
-
-            var service = new BankomatService();
-
-            var password = string.Empty;
-
-            var isPasswordReal = false;
-
-            for (var i = 0; i < 3; i++)
+            logService.LogInfo("Enter password : ");
+            password = Console.ReadLine();
+            isPasswordReal = atmService.CheckPassword(password);
+            if (isPasswordReal)
             {
-                Console.Write("Enter password : ");
-                password = Console.ReadLine();
-                isPasswordReal = service.CheckPassword(password);
-                if (isPasswordReal)
-                {
-                    break;
-                }
-                Log.Error("Password incorrect try again");
+                break;
             }
+            logService.LogInfo("Password incorrect try again");
+            atmService.CheckBalance();
+        }
 
-            if (isPasswordReal == false)
+        if (isPasswordReal == false)
+        {
+            logService.LogInfo("Your card blocked");
+            return;
+        }
+
+        var choice = string.Empty;
+        var balance = 0m;
+        var newPassword = string.Empty;
+        var confirmationCode = string.Empty;
+        var phoneNumber = string.Empty;
+        var phoneNumber1 = string.Empty;
+       
+
+        while (true)
+        {
+            Console.Clear();
+            logService.LogInfo("1.CheckBalance");
+            logService.LogInfo("2.GetCash");
+            logService.LogInfo("3.AddBalance");
+            logService.LogInfo("4.ChangePassword");
+            logService.LogInfo("5.ConnectPhoneNumber");
+            logService.LogInfo("6.GetPhoneNumber");
+            logService.LogInfo("7.GetPassword");
+            logService.LogInfo("8.Exit");
+
+
+            logService.LogInfo("Enter : ");
+            choice = Console.ReadLine();
+
+            if (choice == "1")
             {
-                Log.Error("Your card blocked");
+                balance = atmService.CheckBalance();
+                logService.LogInfo($"Your balance {balance}");
+            }
+            else if (choice == "2")
+            {
+                logService.LogInfo("Enter amount of cash : ");
+                balance = Convert.ToDecimal(Console.ReadLine());
+                var result = atmService.GetCash(balance);
+                if (result) logService.LogInfo("Successfully Withdrawed");
+                else logService.LogError("Error occured");
+            }
+            else if (choice == "3")
+            {
+                logService.LogInfo("Enter amount of cash : ");
+                balance = Convert.ToDecimal(Console.ReadLine());
+                var result = atmService.AddBalance(balance);
+                if (result) logService.LogInfo("Successfull Added");
+                else logService.LogError("Error occured");
+            }
+            else if (choice == "4")
+            {
+                logService.LogInfo("Enter password  ");
+                password = Console.ReadLine();
+                logService.LogInfo("Enter new password ");
+                newPassword = Console.ReadLine();
+                logService.LogInfo("Confirm password ");
+                confirmationCode = Console.ReadLine();
+                var result1 = atmService.CheckPassword(password);
+                var result2 = atmService.ChangePaswword(newPassword, confirmationCode);
+                if (result1 && result2) logService.LogInfo("Successfull Changed");
+                else logService.LogError("Error occured");
+            }
+            else if (choice == "5")
+            {
+                logService.LogInfo("Enter phone number to connect card ");
+                phoneNumber = Console.ReadLine();
+                var result = atmService.ConnectPhoneNumber(phoneNumber);
+                if (result) logService.LogInfo("Successfull Connected");
+                else logService.LogError("Error occured");
+            }
+            else if (choice == "6")
+            {
+                var result = atmService.GetPhoneNumber();
+                if (result == string.Empty) logService.LogInfo("There is no connected phone number");
+                else logService.LogInfo("Phone number is : " + result);
+            }
+            else if(choice == "7")
+            {
+                var result = atmService.GetPassword();
+                logService.LogInfo($"Your password is {result}");
+            }
+            else if(choice == "8")
+            {
                 return;
             }
 
-            var choice = string.Empty;
-            var balance = 0m;
-            var newPassword = string.Empty;
-            var confirmationCode = string.Empty;
-            var phoneNumber = string.Empty;
-            var phoneNumber1 = string.Empty;
-            while (true)
-            {
-                Console.Clear();
-                Console.WriteLine("1.CheckBalance");
-                Console.WriteLine("2.GetCash");
-                Console.WriteLine("3.AddBalance");
-                Console.WriteLine("4.ChangePassword");
-                Console.WriteLine("5.ConnectPhoneNumber");
-                Console.WriteLine("6.GetPhoneNumber");
-
-
-                Console.Write("Enter : ");
-                choice = Console.ReadLine();
-
-                if (choice == "1")
-                {
-                    balance = service.CheckBalance();
-                    Console.WriteLine($"Your balance {balance}");
-                }
-                else if (choice == "2")
-                {
-                    Console.Write("Enter amount of cash : ");
-                    balance = Convert.ToDecimal(Console.ReadLine());
-                    var result = service.GetCash(balance);
-                    if (result) Console.WriteLine("Successfully Withdrawed");
-                    else Log.Error("Error occured");
-                }
-                else if (choice == "3")
-                {
-                    Console.Write("Enter amount of cash : ");
-                    balance = Convert.ToDecimal(Console.ReadLine());
-                    var result = service.AddBalance(balance);
-                    if (result) Console.WriteLine("Successfull Added");
-                    else Log.Error("Error occured");
-                }
-                else if (choice == "4")
-                {
-                    Console.Write("Enter new password ");
-                    newPassword = Console.ReadLine();
-                    Console.Write("Enter Confirmation Code ");
-                    confirmationCode = Console.ReadLine();
-                    var result = service.ChangePaswword(newPassword, confirmationCode);
-                    if (result) Console.WriteLine("Successfull Changed");
-                    else Log.Error("Error occured");
-
-
-                }
-                else if (choice == "5")
-                {
-                    Console.Write("Enter phone number to connect card ");
-                    phoneNumber = Console.ReadLine();
-                    var result = service.ConnectPhoneNumber(phoneNumber);
-                    if (result) Console.WriteLine("Successfull Connected");
-                    else Log.Error("Error occured");
-
-
-                }
-                else if (choice == "6")
-                {
-                    Console.Write("Enter phone number  ");
-                    phoneNumber1 = Console.ReadLine();
-                    var result = service.GetPhoneNumber();
-                    if (result == string.Empty) Log.Information("There is no connected phone number");
-                    else Console.WriteLine(result);
-
-                }
-
-                Console.ReadKey();
-            }
-
-
+            Console.ReadKey();
         }
     }
 }
